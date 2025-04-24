@@ -1,0 +1,44 @@
+import subprocess
+import json
+import sys
+
+def query_protein_name(protein_name):
+    try:
+        # Run the ollama model with the given protein name
+        result = subprocess.run(
+            ['ollama', 'run', 'protein-bio'],
+            input=f'What is {protein_name}?',
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        # Check for errors
+        if result.returncode != 0:
+            print("❌ Ollama error:", result.stderr)
+            return None
+
+        output = result.stdout.strip()
+
+        # Attempt to parse JSON from the response
+        try:
+            data = json.loads(output)
+            return data
+        except json.JSONDecodeError:
+            print("⚠️ Unable to parse JSON. Output was:")
+            print(output)
+            return None
+
+    except Exception as e:
+        print("❌ Error running query:", e)
+        return None
+
+# If script is run from command line
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Usage: python query_protein.py 'Protein Name'")
+    else:
+        protein_name = ' '.join(sys.argv[1:])
+        data = query_protein_name(protein_name)
+        if data:
+            print(json.dumps(data, indent=2))

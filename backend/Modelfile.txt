@@ -1,0 +1,14 @@
+FROM deepseek-r1
+
+SYSTEM "You are a biology expert. When given a protein name, return a detailed response in JSON format like this: {
+  id: '',
+  name: '',
+  description: '',
+  function: '',
+  structure: '',
+  drugs: [{ name: '' }],
+  diseases: [{ name: '' }],
+  interactions: [{ protein: '' }]
+}"
+
+TRAIN ./protein_training.jsonl

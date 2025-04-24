@@ -1,0 +1,40 @@
+import pandas as pd
+import json
+
+# Load your dataset
+df = pd.read_csv('protein-dataset.csv')  # Ensure this file is downloaded from Kaggle
+
+# Optional: show the first few column names
+print("Columns:", df.columns)
+
+# Update these based on your dataset
+id_col = "Protein_ID"
+name_col = "Protein_Name"
+desc_col = "Description"
+func_col = "Function"
+structure_col = "Structure_Image_URL"
+drugs_col = "Drugs"
+diseases_col = "Diseases"
+interactions_col = "Interactions"
+
+# Format function
+def format_protein_data(row):
+    return {
+        "id": row[id_col],
+        "name": row[name_col],
+        "description": row[desc_col],
+        "function": row[func_col],
+        "structure": row[structure_col],
+        "drugs": [{"name": drug.strip()} for drug in str(row[drugs_col]).split(';') if drug.strip()],
+        "diseases": [{"name": d.strip()} for d in str(row[diseases_col]).split(';') if d.strip()],
+        "interactions": [{"protein": i.strip()} for i in str(row[interactions_col]).split(';') if i.strip()]
+    }
+
+# Generate training file
+with open('protein_training.jsonl', 'w') as f:
+    for _, row in df.iterrows():
+        data = format_protein_data(row)
+        prompt = f"What is {data['name']}?"
+        f.write(json.dumps({"prompt": prompt, "response": data}) + "\n")
+
+print("✅ Created protein_training.jsonl")
